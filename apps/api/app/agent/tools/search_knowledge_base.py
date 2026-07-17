@@ -1,0 +1,1 @@
+"""Knowledge base search tool placeholder. See architecture.md §5.3."""
