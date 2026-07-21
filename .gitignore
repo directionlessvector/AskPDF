@@ -49,3 +49,9 @@ docker-compose.override.yml
 *.pid
 *.tar
 *.tgz
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Alembic (versions/ is tracked; local sqlite fallback db is not)
+*.sqlite3
