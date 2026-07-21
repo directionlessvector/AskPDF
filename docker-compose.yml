@@ -1,0 +1,88 @@
+services:
+  api:
+    build:
+      context: ./apps/api
+    container_name: askpdf-api
+    environment:
+      APP_NAME: ${API_APP_NAME:-AskPDF API}
+      ENVIRONMENT: ${API_ENVIRONMENT:-local}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-askpdf}:${POSTGRES_PASSWORD:-askpdf}@postgres:5432/${POSTGRES_DB:-askpdf}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+    container_name: askpdf-web
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./apps/web:/app
+      - web_node_modules:/app/node_modules
+      - web_next_cache:/app/.next
+    depends_on:
+      - api
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: askpdf-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-askpdf}
+      POSTGRES_USER: ${POSTGRES_USER:-askpdf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-askpdf}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: askpdf-qdrant
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  localstack:
+    image: localstack/localstack:3.8.1
+    container_name: askpdf-localstack
+    environment:
+      SERVICES: ${LOCALSTACK_SERVICES:-s3,sqs}
+      DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      DEBUG: ${LOCALSTACK_DEBUG:-0}
+    ports:
+      - "${LOCALSTACK_EDGE_PORT:-4566}:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:4566/_localstack/health >/dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  web_node_modules:
+  web_next_cache:
+  postgres_data:
+  qdrant_data:
+  localstack_data:

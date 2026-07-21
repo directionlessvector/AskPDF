@@ -1,1 +1,3 @@
-// Login route placeholder for the AskPDF AI sign-in flow.
+export default function LoginPage() {
+  return <main>Login placeholder</main>;
+}

@@ -1,1 +1,3 @@
-// Chat detail route placeholder for the agentic conversation view.
+export default function ChatPage() {
+  return <main>Chat placeholder</main>;
+}

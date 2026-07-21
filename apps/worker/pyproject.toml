@@ -1,0 +1,49 @@
+[project]
+name = "askpdf-worker"
+version = "0.1.0"
+description = "Ingestion worker service for AskPDF AI."
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.13,<2.0",
+    "asyncpg>=0.29,<1.0",
+    "boto3>=1.35,<2.0",
+    "fastapi>=0.115,<1.0",
+    "pydantic-settings>=2.6,<3.0",
+    "qdrant-client>=1.12,<2.0",
+    "sentence-transformers>=3.2,<4.0",
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "uvicorn[standard]>=0.30,<1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.0,<25.0",
+    "mypy>=1.11,<2.0",
+    "ruff>=0.6,<1.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "tests"]
+warn_unused_configs = true

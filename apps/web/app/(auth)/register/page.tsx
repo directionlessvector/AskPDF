@@ -1,1 +1,3 @@
-// Register route placeholder for the AskPDF AI sign-up flow.
+export default function RegisterPage() {
+  return <main>Register placeholder</main>;
+}
